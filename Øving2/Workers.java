@@ -7,6 +7,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Workers{
     private Lock jobQueueLock = new ReentrantLock();
+    //====================================================
+    //Todo: gjør om runnable til jobb
+    //====================================================
     private Queue<Runnable> jobQueue = new ConcurrentLinkedQueue<>();
     private Condition jobAvailable = jobQueueLock.newCondition();
 
@@ -34,7 +37,7 @@ public class Workers{
                 //====================================================
                 //Todo: gjør om runnable til jobb
                 //====================================================
-                
+
                 while (jobQueue.isEmpty() || jobQueue.peek().startTime > System.currentTimeMillis()) {
                     try {
                         if(!jobQueue.isEmpty()) {
@@ -70,6 +73,9 @@ public class Workers{
         });
     }
 
+    //====================================================
+    //Todo: gjør om runnable til jobb
+    //====================================================
     public void post(Runnable runnable) {
         jobQueueLock.lock();
         jobQueue.add(runnable);
