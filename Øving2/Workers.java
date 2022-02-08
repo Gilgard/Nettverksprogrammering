@@ -1,16 +1,13 @@
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Workers{
     private Lock jobQueueLock = new ReentrantLock();
-    //====================================================
-    //Todo: gjør om runnable til jobb
-    //====================================================
     private Queue<Job> jobQueue = new ConcurrentLinkedQueue<>();
     private Condition jobAvailable = jobQueueLock.newCondition();
 
@@ -34,11 +31,6 @@ public class Workers{
 
             while(isRunning) {
                 jobQueueLock.lock();
-
-                //====================================================
-                //Todo: gjør om runnable til jobb
-                //====================================================
-
                 while (jobQueue.isEmpty() || jobQueue.peek().startTime > System.currentTimeMillis()) {
                     try {
                         if(!jobQueue.isEmpty()) {
@@ -60,24 +52,56 @@ public class Workers{
                 }
 
                 // Adding new job to active jobs-list.
-                workerListLock.lock();
-
-                Thread jobThread = new Thread(jobQueue.poll());
-                while(!workers.offer(jobThread)) {
-                    try {
-                        availableWorker.await();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+                findWorkerForJob(jobQueue.poll().runnable);
+                jobAvailable.signalAll();
             }
         });
     }
 
-    //====================================================
-    //Todo: gjør om runnable til jobb
-    //====================================================
-    public void post(Job job) {
+    private void findWorkerForJob(Runnable runnable) {
+        workerListLock.lock();
+
+        Thread jobThread = new Thread(runnable);
+        while(!workers.offer(jobThread)) {
+            try {
+                availableWorker.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Creates separate thread to follow the thread state, and remove it from active jobs once completed.
+        Thread waitThread = new Thread(() -> {
+            jobThread.start();
+
+            try {
+                jobThread.join();
+
+                workerListLock.lock();
+                workers.remove(jobThread);
+                availableWorker.signalAll();
+                workerListLock.unlock();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        waitThread.start();
+        workerListLock.unlock();
+    }
+
+    public void post(Runnable runnable){
+        Job job = new Job(runnable, 0);
+        addJobToQueue(job);
+    }
+
+    public void postTimeOut(Runnable runnable, long waitTime) {
+        Job job = new Job(runnable, System.currentTimeMillis() + waitTime);
+        addJobToQueue(job);
+    }
+
+    private void addJobToQueue(Job job) {
         jobQueueLock.lock();
         jobQueue.add(job);
         jobAvailable.signalAll();
@@ -103,7 +127,7 @@ public class Workers{
         jobQueueLock.unlock();
     }
     
-    public void joinAvailableWorkers() {
+    private void joinAvailableWorkers() {
         workerListLock.lock();
         while(!workers.isEmpty()) {
             try {
@@ -117,24 +141,13 @@ public class Workers{
     }
 }
 
-//====================================================
-    //Todo: Sjekk om vi kan bruke dette istedenfor Runnable
-    //====================================================
-
-class Job implements Comparable {
-
-    Runnable job;
+class Job {
+    Runnable runnable;
     long startTime;
 
-    public Job(Runnable job, long startTime) {
-        this.job = job;
+    public Job(Runnable runnable, long startTime) {
+        this.runnable = runnable;
         this.startTime = startTime;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        Job j = (Job) o;
-        return Long.compare(this.startTime, j.startTime);
     }
 }
 
