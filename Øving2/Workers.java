@@ -1,5 +1,6 @@
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -10,7 +11,7 @@ public class Workers{
     //====================================================
     //Todo: gjør om runnable til jobb
     //====================================================
-    private Queue<Runnable> jobQueue = new ConcurrentLinkedQueue<>();
+    private Queue<Job> jobQueue = new ConcurrentLinkedQueue<>();
     private Condition jobAvailable = jobQueueLock.newCondition();
 
     private Lock workerListLock = new ReentrantLock();
@@ -76,9 +77,9 @@ public class Workers{
     //====================================================
     //Todo: gjør om runnable til jobb
     //====================================================
-    public void post(Runnable runnable) {
+    public void post(Job job) {
         jobQueueLock.lock();
-        jobQueue.add(runnable);
+        jobQueue.add(job);
         jobAvailable.signalAll();
         jobQueueLock.unlock();
     }
@@ -115,3 +116,25 @@ public class Workers{
         workerListLock.unlock();
     }
 }
+
+//====================================================
+    //Todo: Sjekk om vi kan bruke dette istedenfor Runnable
+    //====================================================
+
+class Job implements Comparable {
+
+    Runnable job;
+    long startTime;
+
+    public Job(Runnable job, long startTime) {
+        this.job = job;
+        this.startTime = startTime;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Job j = (Job) o;
+        return Long.compare(this.startTime, j.startTime);
+    }
+}
+
