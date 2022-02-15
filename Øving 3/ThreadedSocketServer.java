@@ -62,23 +62,17 @@ public class ThreadedSocketServer extends Thread {
 
     public static void main(String[] args) {
         try {
-            ServerSocket server = new ServerSocket(2222);
+            ServerSocket server = new ServerSocket(1250);
             System.out.println("Log for server. Now we wait...");
 
-            for (int i = 0; i < 5; i++) {
-                try {
-                    System.out.println("Waiting for client");
-                    Thread t = new ThreadedSocketServer(server.accept());
-                    t.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            while(true) {
+                System.out.println("Waiting for client");
+                Socket connection = server.accept();
+                Thread t = new ThreadedSocketServer(connection);
+                t.start();
             }
-
-            server.close();
         }catch(Exception e) {
             e.printStackTrace();
         }
     }
-
 }

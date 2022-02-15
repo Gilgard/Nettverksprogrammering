@@ -24,12 +24,12 @@ public class SocketServer {
                 if(result == Integer.MAX_VALUE) {
                     System.out.println("The equation could not be read.");
                     writer.println("The equation could not be read.");
-                }
-                if(result == Integer.MIN_VALUE) {
+                }else if(result == Integer.MIN_VALUE) {
                     System.out.println("Dividing by zero is not possible.");
                     writer.println("Dividing by zero is not possible.");
+                }else {
+                    writer.println(input + " = " + result);
                 }
-                writer.println(input + " = " + result);
                 input = reader.readLine();
             }
             
@@ -56,7 +56,6 @@ public class SocketServer {
                 
             case "/":
                 if(secondNumber == 0){
-                    System.out.println("Å dele på null er tull!");
                     return Integer.MIN_VALUE;
                 }
                 return firstNumber / secondNumber;
