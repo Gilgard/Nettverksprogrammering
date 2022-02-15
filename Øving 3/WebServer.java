@@ -29,7 +29,7 @@ public class WebServer extends Thread {
             writer.println("<h3>These are your headers:</h3>");
             writer.println("<ul>");
             reader.lines().filter( line -> !line.isEmpty())
-                            .forEach( line -> writer.println("<li>$line</li>"));
+                            .forEach( line -> writer.printf("<li>%s</li>", line));
             writer.println("</ul>");
             writer.println("</body>");
             writer.println("</html>");
@@ -39,7 +39,6 @@ public class WebServer extends Thread {
             e.printStackTrace();
         }
     }
-    
 
 
     public static void main(String[] args) {
@@ -47,18 +46,15 @@ public class WebServer extends Thread {
         ServerSocket server;
         try {
             server = new ServerSocket(PORT_NUMBER);
-        
             System.out.println("Log for server. Now we wait...");
-            for (int i = 0; i< 50; i++) {
-                try {
-                    Socket connection = server.accept();
-                    System.out.println("Thread nr: ${i + 1} waiting for client");
-                    WebServer t = new WebServer(connection);
-                    t.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
+            while(true) {
+                Socket connection = server.accept();
+                System.out.println("Thread waiting for client");
+                WebServer t = new WebServer(connection);
+                t.start();
             }
+            
         } catch (IOException e1) {
             e1.printStackTrace();
         }
