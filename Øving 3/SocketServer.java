@@ -18,8 +18,22 @@ public class SocketServer {
             //  Receives data from client
             String input = reader.readLine();
             while (input != null) {
+                if(input.equals("")){
+                    break;
+                }
+
                 System.out.println("A client wrote: " + input);
-                writer.println(input + " = " + calc(input));
+                double result = (double) calc(input);
+
+                if(result == Integer.MAX_VALUE) {
+                    System.out.println("The equation could not be read.");
+                    writer.println("The equation could not be read.");
+                }else if(result == Integer.MIN_VALUE) {
+                    System.out.println("Dividing by zero is not possible.");
+                    writer.println("Dividing by zero is not possible.");
+                }else {
+                    writer.println(input + " = " + result);
+                }
                 input = reader.readLine();
             }
             
@@ -29,13 +43,12 @@ public class SocketServer {
         }
     }
 
-    private static int calc(String equation) {
+    private static double calc(String equation) {
         String[] parts = equation.split(" ");
-        int firstNumber = Integer.parseInt(parts[0]);
+        double firstNumber = (double) Integer.parseInt(parts[0]);
         String symbol = parts[1];
-        int secondNumber = Integer.parseInt(parts[2]);
+        double secondNumber = (double) Integer.parseInt(parts[2]);
         switch(symbol){
-
             case "+":
                 return firstNumber + secondNumber;
 
@@ -48,11 +61,12 @@ public class SocketServer {
             case "/":
                 if(secondNumber == 0){
                     System.out.println("Å dele på null er tull!");
+                    return Integer.MIN_VALUE;
                 }
                 return firstNumber / secondNumber;
 
             default:
-                return 0;
+                return Integer.MAX_VALUE;
         }
     }
 }
