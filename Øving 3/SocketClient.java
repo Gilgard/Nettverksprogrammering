@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class SocketClient {
     public static void main(String[] args) {
-        int PORT_NUMBER = 2222;
+        int PORT_NUMBER = 1250;
         Scanner readFromCommandLine = new Scanner(System.in);
         System.out.print("Type host of server: ");
         String clientMachine = readFromCommandLine.nextLine();
