@@ -24,7 +24,11 @@ public class SocketClient {
 
             // Reads input from commandline (the user)
             String oneLine = readFromCommandLine.nextLine();
-            while (oneLine.equals("")) {
+            while (oneLine != null) {
+                if(oneLine.equals("")){
+                    System.out.println("Exiting program.");
+                    break;
+                }
                 writer.println(oneLine);
                 String response = reader.readLine();
                 System.out.println("From server: " + response);
