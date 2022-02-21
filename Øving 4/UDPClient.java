@@ -47,6 +47,7 @@ public class UDPClient {
                 System.out.println("The Result is " + (new String(dpReceive.getData(), 0, dpReceive.getLength())));
             }
         }
+        scNr.close();
     }
 
     public void close() {

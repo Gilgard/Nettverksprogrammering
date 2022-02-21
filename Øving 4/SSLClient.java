@@ -37,6 +37,7 @@ public class SSLClient {
                     out.println(inputLine);
                     System.out.println(bufferedReader.readLine());
                 }
+                scanner.close();
             }
 
         } catch (IOException ex) {
