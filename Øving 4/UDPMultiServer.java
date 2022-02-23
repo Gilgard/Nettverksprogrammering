@@ -15,54 +15,57 @@ public class UDPMultiServer extends Thread{
     public void run() {
         try {
             System.out.println("Server booting...");
-            String received = "-1";
-            while (!received.isBlank()) {
+            String received;
+
+            while (true) {
 
                 ds.receive(dpReceive);
                 received = (new String(dpReceive.getData(), 0, dpReceive.getLength()));
 
                 System.out.println("Number received " + received);
 
-                String solved = received + " " + calculate(received);
+                String solved = received + " = " + calculate(received);
                 byte[] send = solved.getBytes();
 
                 dpSend = new DatagramPacket(send, send.length, inetAddress, dpReceive.getPort());
                 ds.send(dpSend);
             }
-            ds.close();
+
         } catch (IOException e){
             e.printStackTrace();
         }
     }
 
     public String calculate(String received){
-        String result = "";
-        String[] components;
+        try{
+            String[] parts = received.split(" ");
+            int firstNumber = Integer.parseInt(parts[0]);
+            String symbol = parts[1];
+            int secondNumber = Integer.parseInt(parts[2]);
+        
+            switch(symbol){
+                case "+":
+                    return (firstNumber + secondNumber) + "";
 
-        if (received.contains("-")){
-            components = received.split("-");
-            result = "" + (Integer.parseInt(components[0])-Integer.parseInt(components[1]));
+                case "-":
+                    return (firstNumber - secondNumber) + "";
+
+                case "*":
+                    return (firstNumber * secondNumber) + "";
+                    
+                case "/":
+                    if(secondNumber == 0){
+                        return "nAn";
+                    }
+                    return ((double)firstNumber / (double)secondNumber) + "";
+
+                default:
+                    return "Something went wrong in the calculation process.";
+            }
+
+        }catch (Exception e) {
+            return "Invalid input.";
         }
-        else if (received.contains("+"))
-        {
-            components = received.split("\\+");
-            result = "" + (Integer.parseInt(components[0])+Integer.parseInt(components[1]));
-        }
-        else if (received.contains("*"))
-        {
-            components = received.split("\\*");
-            result = "" + (Integer.parseInt(components[0])*Integer.parseInt(components[1]));
-        }
-        else if (received.contains("/"))
-        {
-            components = received.split("/");
-            result = "" + (Double.parseDouble(components[0])/Integer.parseInt(components[1]));
-        }
-        else
-        {
-            result = "Equation is invalid";
-        }
-        return result;
     }
 
     public static void main(String[] args) throws IOException {

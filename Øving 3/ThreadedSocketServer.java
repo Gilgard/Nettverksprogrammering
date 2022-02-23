@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 public class ThreadedSocketServer extends Thread {
     private Socket connection;
@@ -64,13 +65,21 @@ public class ThreadedSocketServer extends Thread {
         try {
             ServerSocket server = new ServerSocket(1250);
             System.out.println("Log for server. Now we wait...");
-
-            while(true) {
-                System.out.println("Waiting for client");
+            Scanner scanner = new Scanner(System.in);
+            String nextLine = "";
+            
+            while(!nextLine.trim().equals("q")) {
+                System.out.println("Waiting for client, write 'q' to stop server.");
                 Socket connection = server.accept();
                 Thread t = new ThreadedSocketServer(connection);
                 t.start();
+                if(scanner.hasNext()) {
+                    nextLine = scanner.next();
+                }
             }
+
+            server.close();
+            scanner.close();
         }catch(Exception e) {
             e.printStackTrace();
         }

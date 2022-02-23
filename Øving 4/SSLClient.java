@@ -16,7 +16,7 @@ public class SSLClient {
 
     public static void main(String[] args) {
 
-        System.setProperty("javax.net.ssl.trustStore", "src/myKeyStore/keystore.jts");
+        System.setProperty("javax.net.ssl.trustStore", "./keys/keystore.jts");
         System.setProperty("javax.net.ssl.trustStorePassword", "kenrobin");
         SSLSocketFactory sslSocketFactory =
                 (SSLSocketFactory)SSLSocketFactory.getDefault();
