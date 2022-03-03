@@ -17,8 +17,7 @@
 </template>
 
 <script>
-import * as exec from 'browserify-exec'
-import * as fs from 'browserify-fs'
+import axios from 'axios';
 
 export default {
   data() {
@@ -31,51 +30,22 @@ export default {
   },
   name: 'Compiler',
   methods:{
-    setInfo(string) {
-      this.info = string;
-    },
     submit() {
-      this.setInfo("Kompilerer...");
-      try {
-        this.code = this.input
-        if (this.code != undefined) {
-          this.writeToFile()
-          this.execCode()
-        } else {
-          this.error("Could not find the code input");
-        }
-      }catch (error) {
-        this.setInfo("Noe gikk galt, sjekk loggen");
-        this.output = error;
-      }
-      setTimeout(() => this.setInfo(""), 5000);
-    },
+      this.code = this.input;
 
-    error(error) {
-      throw new Error(JSON.stringify(error))
-    },
-
-    writeToFile() {
-      fs.writeFile("books.txt", this.code, (err) => {
-        throw new Error(err)
-      })
-    },
-
-    execCode() {
-      exec('docker build "./compile/" -q -t gcc', (buildLog, buildError) => {
-        if (buildError) {
-          this.error(buildError)
-        }
-        exec("docker run --rm gcc", (runOutput, runError) => {
-          if (runError) {
-            this.error(runError);
+        axios({
+          url: "http://localhost:8080/",
+          method: "post",
+          params: {
+            code: this.code
           }
-          this.output = JSON.stringify({ result: `${buildLog}\n\n--- Output: ---\n\n${runOutput}` })
         })
-      })
+        .then(response => {
+          this.output = response.data;
+        })
+        .catch(error => console.error(error));
+      }
     },
-
-  }
 }
 </script>
 
