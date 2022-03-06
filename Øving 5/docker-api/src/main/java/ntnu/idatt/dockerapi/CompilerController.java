@@ -2,12 +2,16 @@ package ntnu.idatt.dockerapi;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.OutputStream;
+
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerResponse;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import org.zalando.logbook.Logbook;
 
 @CrossOrigin
@@ -17,52 +21,36 @@ public class CompilerController {
 
     @PostMapping("/")
     public String dock(@RequestParam String code) throws Exception {
-        OutputStream result = null;
+        String result = "Kontakt er oppe, men ingenting ble gjort";
 
         //write code to file
-        File main = new File(ClassLoader.getSystemResource("main.cpp").toURI());
+        File main = new File("main.cpp");
+        result = "Filen ble laget og er på path: " + main.getPath();
         FileWriter myWriter = new FileWriter(main);
         myWriter.write(code);
         myWriter.close();
 
         //run code in docker
-        Process build = Runtime.getRuntime().exec("docker build \"./compile/\" -q -t gcc");
-        if(build.waitFor() == 0) {
-            Process run = Runtime.getRuntime().exec("docker run --rm gcc");
-            run.waitFor();
-            result = run.getOutputStream();
-        }
+        DockerClient dockerClient = Docker.getDockerClient();
+        dockerClient.pingCmd().exec(); //ping docker client to see if it's awake :)
+        dockerClient.buildImageCmd(new File("Dockerfile"));
+        CreateContainerResponse container = dockerClient.createContainerCmd("Dockerfile").exec();
+        dockerClient.startContainerCmd(container.getId());
         
-        if(result == null) {
-            return "Something went terribly wrong";
-        }
+
+
+        // Process build = Runtime.getRuntime().exec("docker build \"./compile/\" -q -t gcc");
+        // if(build.waitFor() == 0) {
+        //     Process run = Runtime.getRuntime().exec("docker run --rm gcc");
+        //     run.waitFor();
+        //     result = run.getOutputStream();
+        // }
+        
+        // if(result == null) {
+        //     return "Something went terribly wrong";
+        // }
+
         //return
-        return result.toString();
+        return result;
     }
-
-    /*
-    private str executeCommand(String command) {
-        try {
-            log(command);
-            Process process = Runtime.getRuntime().exec(command);
-            logOutput(process.getInputStream(), "");
-            logOutput(process.getErrorStream(), "Error: ");
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void logOutput(InputStream inputStream, String prefix) {
-        new Thread(() -> {
-            Scanner scanner = new Scanner(inputStream, "UTF-8");
-            while (scanner.hasNextLine()) {
-                synchronized (this) {
-                    log(prefix + scanner.nextLine());
-                }
-            }
-            scanner.close();
-        }).start();
-    }
-    */
 }

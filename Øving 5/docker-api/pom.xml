@@ -33,6 +33,22 @@
 			<artifactId>logbook-spring-boot-starter</artifactId>
 			<version>1.5.0</version>
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java-core -->
+		<dependency>
+			<groupId>com.github.docker-java</groupId>
+			<artifactId>docker-java-core</artifactId>
+			<version>3.2.13</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java-transport-httpclient5 -->
+		<dependency>
+			<groupId>com.github.docker-java</groupId>
+			<artifactId>docker-java-transport-httpclient5</artifactId>
+			<version>3.2.13</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
