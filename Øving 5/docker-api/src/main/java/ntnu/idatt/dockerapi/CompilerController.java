@@ -1,7 +1,9 @@
 package ntnu.idatt.dockerapi;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.InputStream;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -31,26 +33,33 @@ public class CompilerController {
         myWriter.close();
 
         //run code in docker
+        /*
         DockerClient dockerClient = Docker.getDockerClient();
         dockerClient.pingCmd().exec(); //ping docker client to see if it's awake :)
         dockerClient.buildImageCmd(new File("Dockerfile"));
         CreateContainerResponse container = dockerClient.createContainerCmd("Dockerfile").exec();
         dockerClient.startContainerCmd(container.getId());
-        
+        */
 
+        // build docker container
+        String buildCommands = "docker build -q -t gcc";
+        Process build = Runtime.getRuntime().exec(buildCommands.split(" "));
+        build.waitFor();
 
-        // Process build = Runtime.getRuntime().exec("docker build \"./compile/\" -q -t gcc");
-        // if(build.waitFor() == 0) {
-        //     Process run = Runtime.getRuntime().exec("docker run --rm gcc");
-        //     run.waitFor();
-        //     result = run.getOutputStream();
-        // }
-        
-        // if(result == null) {
-        //     return "Something went terribly wrong";
-        // }
+        // run docker container
+        String runCommands = "docker run --rm gcc";
+        Process run = Runtime.getRuntime().exec(runCommands.split(" "));
+        BufferedInputStream stream = new BufferedInputStream(run.getInputStream());
 
-        //return
+        // read output from container
+        result = readProcess(stream);
+
+        // return
         return result;
+    }
+
+    private String readProcess(InputStream stream) {
+        //build buffered stream to string
+        return null;
     }
 }
