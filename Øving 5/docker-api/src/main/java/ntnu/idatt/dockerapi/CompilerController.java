@@ -1,19 +1,9 @@
 package ntnu.idatt.dockerapi;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collector;
-
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
+import java.util.Scanner;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,15 +28,6 @@ public class CompilerController {
         myWriter.write(code);
         myWriter.close();
 
-        //run code in docker
-        /*
-        DockerClient dockerClient = Docker.getDockerClient();
-        dockerClient.pingCmd().exec(); //ping docker client to see if it's awake :)
-        dockerClient.buildImageCmd(new File("Dockerfile"));
-        CreateContainerResponse container = dockerClient.createContainerCmd("Dockerfile").exec();
-        dockerClient.startContainerCmd(container.getId());
-        */
-
         // build docker container
         String buildCommands = "docker build -q -t gcc";
         Process build = Runtime.getRuntime().exec(buildCommands.split(" "));
@@ -55,23 +36,22 @@ public class CompilerController {
         // run docker container
         String runCommands = "docker run --rm gcc";
         Process run = Runtime.getRuntime().exec(runCommands.split(" "));
-        BufferedInputStream stream = new BufferedInputStream(run.getInputStream());
 
         // read output from container
-        result = readProcess(stream);
+        result = readProcess(run.getInputStream());
 
         // return
         return result;
     }
 
-    private String readProcess(InputStream stream) throws Error {
+    private String readProcess(InputStream stream) {
         //build buffered stream to string
-
-
-        BufferedInputStream buffy = new BufferedInputStream(stream);
-
-        String string = new StringBuilder(buffy.read());
-
-        return string;
+        Scanner scanner = new Scanner(stream);
+        StringBuilder stringBuilder = new StringBuilder();
+        while (scanner.hasNext()) {
+            stringBuilder.append(scanner.next());
+        }
+        scanner.close();
+        return stringBuilder.toString();
     }
 }
