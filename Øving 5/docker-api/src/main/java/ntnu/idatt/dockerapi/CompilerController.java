@@ -29,13 +29,14 @@ public class CompilerController {
         myWriter.close();
 
         // build docker container
-        String buildCommands = "docker build -q -t gcc";
+        String buildCommands = "docker build -q -t gcc .";
         Process build = Runtime.getRuntime().exec(buildCommands.split(" "));
-        build.waitFor();
+        if (build.waitFor() != 0) return "Could not build docker container";
 
         // run docker container
         String runCommands = "docker run --rm gcc";
         Process run = Runtime.getRuntime().exec(runCommands.split(" "));
+        if (run.waitFor() != 0) return "Could not run docker container";
 
         // read output from container
         result = readProcess(run.getInputStream());
