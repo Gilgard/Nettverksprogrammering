@@ -10,13 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import org.zalando.logbook.Logbook;
-
 @CrossOrigin
 @RestController
 public class CompilerController {
-    Logbook logbook = Logbook.create();
-
     @PostMapping("/")
     public String dock(@RequestParam String code) throws Exception {
         String result = "Kontakt er oppe, men ingenting ble gjort";
