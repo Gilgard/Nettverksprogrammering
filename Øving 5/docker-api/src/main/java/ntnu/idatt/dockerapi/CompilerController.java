@@ -35,7 +35,9 @@ public class CompilerController {
         if (run.waitFor() != 0) return "Could not run docker container";
 
         // read output from container
-        result = readProcess(run.getInputStream());
+        InputStream stream = run.getInputStream();
+        if(stream == null) return "No return from process found";
+        result = readProcess(stream);
 
         // return
         return result;
