@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 public class UDPClient {
     DatagramSocket ds = new DatagramSocket();
-    InetAddress inetAddress = InetAddress.getLocalHost();
     byte[] byteArr = new byte[1024];
     byte[] byteSend;
     DatagramPacket dpReceive = new DatagramPacket(byteArr, byteArr.length);
@@ -15,6 +14,8 @@ public class UDPClient {
     }
 
     public void start() throws IOException {
+        System.out.println("Host ip-address:");
+        InetAddress inetAddress = InetAddress.getByName(scNr.next().trim());
         System.out.println("________CALCULATOR________\nWrite an equation and it will be calculated for you, separate by space (e.g: '5 + 5'). \nTo exit write: 'q'");
         String nextLine = scNr.nextLine();
         while (true) { 
