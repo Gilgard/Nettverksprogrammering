@@ -52,6 +52,14 @@ server.on('upgrade', function (req, socket) {
         console.log('WebSocket connection closed by the client.');
     }
   });
+
+  socket.on('error', (error) => {
+    console.error('Error: ', error);
+  });
+
+  socket.on('end', () => {
+    console.log('Client disconnected');
+  });
 });
 
 function constructReply(data) {
