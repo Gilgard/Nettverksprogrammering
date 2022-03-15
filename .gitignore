@@ -1,3 +1,4 @@
 .vscode
 .ide
 *.class
+*/node_modules
