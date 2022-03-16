@@ -27,7 +27,10 @@ public class CompilerController {
         // build docker container
         String buildCommands = "docker build -q -t gcc .";
         Process build = Runtime.getRuntime().exec(buildCommands.split(" "));
-        if (build.waitFor() != 0) return "Could not build docker container";
+        if (build.waitFor() != 0) {
+            System.out.print(readProcess(build.getErrorStream()));
+            return "Could not build docker container, exit value: " + build.exitValue();
+        }
 
         // run docker container
         String runCommands = "docker run --rm gcc";
@@ -47,8 +50,8 @@ public class CompilerController {
         //build buffered stream to string
         Scanner scanner = new Scanner(stream);
         StringBuilder stringBuilder = new StringBuilder();
-        while (scanner.hasNext()) {
-            stringBuilder.append(scanner.next());
+        while (scanner.hasNextLine()) {
+            stringBuilder.append(scanner.nextLine());
         }
         scanner.close();
         return stringBuilder.toString();
